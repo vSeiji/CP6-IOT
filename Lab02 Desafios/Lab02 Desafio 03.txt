@@ -1,0 +1,32 @@
+const int ledPin = 3;
+const int potenciometro = A0;
+
+int MIN_RAW = 0;
+int MAX_RAW = 1023;
+int MIN_NIVEL = 0;
+int MAX_NIVEL = 200;
+
+int tensao;
+int nivel_led;
+
+void setup()
+{
+  pinMode(ledPin, OUTPUT);
+  pinMode(potenciometro, INPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  tensao = analogRead(potenciometro);
+  nivel_led = sensorLed(tensao);
+  analogWrite(ledPin, nivel_led);
+  delay(20);
+}
+
+int sensorLed(int raw){
+  int nivel = map(tensao, MIN_RAW, MAX_RAW, MIN_NIVEL, MAX_NIVEL);
+  nivel=max(nivel,MIN_NIVEL);
+  nivel=min(nivel,MAX_NIVEL);
+  return nivel;
+}

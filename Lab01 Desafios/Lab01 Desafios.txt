@@ -1,0 +1,78 @@
+const int LED1 = 12;
+const int LED2 = 13;
+const int buzzer = 10;
+
+void setup(){
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT); 
+}
+
+void loop(){
+  acender_nome();
+}
+
+void acender_led01() {
+  digitalWrite(LED1, HIGH);
+  delay(500);
+  digitalWrite(LED1, LOW);
+}
+
+void acender_led02() {
+  digitalWrite(LED2, HIGH);
+  delay(1000);
+  digitalWrite(LED2, LOW);
+}
+
+void acender_nome() {
+  
+  //S
+  ponto();
+  delay(0);
+  ponto();
+  delay(0);
+  ponto();
+  delay(0);
+  
+  delay(1000);
+  
+  //E
+  ponto();
+  
+  delay(1000);
+  
+  //I
+  ponto();
+  ponto();
+  
+  delay(1000);
+  
+  //J
+  ponto();
+  traco();
+  traco();
+  traco();
+  
+  delay(1000);
+  
+  //I
+  ponto();
+  ponto();
+}
+
+void ponto () {
+  digitalWrite(LED1, HIGH);
+  delay(250);
+  digitalWrite(LED1, LOW);
+}
+
+void traco () {
+  digitalWrite(LED1, HIGH);
+  delay(750);
+  digitalWrite(LED1, LOW);
+}
+
+void tocarSom(int frequencia) {
+  tone(buzzer, frequencia, 200); 
+  delay(250); 
+  noTone(buzzer);
+}

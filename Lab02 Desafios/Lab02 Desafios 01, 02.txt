@@ -1,0 +1,70 @@
+const int buttonPin = 2;
+const int ledPin = 13;
+
+const int buttonPin2 = 3;
+const int ledPin2 = 12;
+
+// Variaveis - Setup 1
+int lastButtonState = HIGH;
+int buttonState;
+int estadoContrario;
+
+// Variveis - Setup 2
+
+int buttonState2;
+int tempoPressionado;
+
+
+// Variaveis - Ambos
+
+unsigned long lastDebounceTime = 0; 
+unsigned long debounceDelay = 50;
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Setup 1
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  
+  //Setup 2
+  pinMode(ledPin2, OUTPUT);
+  pinMode(buttonPin2, INPUT_PULLUP);
+}
+
+void loop() {
+  
+  buttonState2 = digitalRead(buttonPin2);
+  
+  if (buttonState2 == LOW){
+  	tempoPressionado = millis();
+    if (tempoPressionado >= 3000){
+    	digitalWrite(ledPin2, HIGH);
+    }
+  }
+  
+  //---------------
+  int leBotao = digitalRead(buttonPin); 
+
+  if (leBotao != lastButtonState) { 
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (leBotao != buttonState) {
+      buttonState = leBotao;
+
+      if (buttonState == HIGH) {
+        digitalWrite(ledPin, !digitalRead(ledPin));
+        if (digitalRead(ledPin)==1){
+          Serial.print("\nLigado");
+        }
+        else {
+          Serial.print("\nDesligado");
+        }
+    	}
+    }
+    
+  }
+  lastButtonState = leBotao;
+}

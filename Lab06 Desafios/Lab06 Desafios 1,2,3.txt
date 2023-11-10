@@ -1,0 +1,102 @@
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <DHT.h>
+
+#define DHTPIN  4  
+#define LED_PIN 5
+#define DHTTYPE DHT11
+#define triggerPin 16
+#define echoPin 17
+DHT dht(DHTPIN, DHTTYPE);
+
+char* mqttServer = "broker.hivemq.com";
+int mqttPort = 1883;
+char* topicTemp = "testecp3/d1/temp";
+char* topicUmid = "testecp3/d1/umid";
+char* topicResposta = "testecp3/d1/resposta";
+char* topicKm = "testecp3/d1/distancia";
+
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(triggerPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  dht.begin();
+  
+  WiFi.begin(ssid, password, 6);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(5000);
+    Serial.println("Conectando ao WiFi...");
+  }
+  Serial.println("Conectado ao WiFi");
+
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(callback);
+
+  if (client.connect("usuarioTeste")) {
+    Serial.println("Conectado ao Broker MQTT");
+    client.subscribe(topicTemp);
+    client.subscribe(topicUmid);
+    client.subscribe(topicResposta);
+    client.subscribe(topicKm);
+  } else {
+    Serial.println("Falha na conexão ao Broker MQTT");
+  }
+}
+
+void loop() {
+
+  float umidade = dht.readHumidity();
+  float temp = dht.readTemperature();
+
+  long duracao = pulseIn(echoPin, HIGH);
+  float distancia = duracao * 0.034 / 2;
+
+  Serial.println(umidade);
+  Serial.println(temp);
+  Serial.println(distancia);
+  Serial.println("---");
+
+  char tempStr[10];
+  char umidadeStr[10];
+  char kmStr[10];
+
+  dtostrf(temp, 1, 2, tempStr);
+  dtostrf(umidade, 1, 2, umidadeStr);
+  dtostrf(distancia, 1, 2, kmStr);
+
+  client.publish(topicTemp, tempStr);
+  client.publish(topicUmid, umidadeStr);
+  client.publish(topicKm, kmStr);
+   
+  client.loop(); 
+
+  delay(1000);
+
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  String message = "";
+  if (strcmp(topic, topicResposta) == 0) {
+    for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+    }
+    Serial.println("Mensagem recebida no tópico: " + String(topic));
+    Serial.println("Mensagem: " + message);
+    if (message.equals("1")) {
+      digitalWrite(LED_PIN, HIGH);
+    } else {
+      digitalWrite(LED_PIN, LOW);
+    }
+  }
+  
+}
